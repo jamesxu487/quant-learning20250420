@@ -105,7 +105,7 @@ def load_data_av(ticker: str, start_date: datetime.datetime, end_date: datetime.
     if not os.path.exists(cache_dir):
         os.makedirs(cache_dir)
     
-    cache_filename = f"a v_{ticker}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}_{interval}.pkl"
+    cache_filename = f"av_{ticker}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}_{interval}.pkl"
     cache_path = os.path.join(cache_dir, cache_filename)
     
     # 尝试从本地缓存加载数据
@@ -178,9 +178,10 @@ def load_data_av(ticker: str, start_date: datetime.datetime, end_date: datetime.
     
     return df
 
-def flatten_yf_columns(df: pd.DataFrame) -> pd.DataFrame:
+
+def flatten_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
-    将 yfinance 下载的数据 DataFrame 列索引进行扁平化处理，并统一为小写格式。
+    将下载的数据 DataFrame 列索引进行扁平化处理，并统一为小写格式。
     支持单只或多只股票的数据格式。
     """
     if isinstance(df.columns, pd.MultiIndex):
@@ -200,6 +201,10 @@ def standardize_columns(df: pd.DataFrame) -> pd.DataFrame:
     # 保证日期列名称为 "datetime"
     if "datetime" not in df.columns and "date" in df.columns:
         df.rename(columns={"date": "datetime"}, inplace=True)
+
+    # 保证日期列名称为 "datetime". Alplha Vantage API 返回的日期列名为 "index"
+    if "datetime" not in df.columns and "index" in df.columns:
+        df.rename(columns={"index": "datetime"}, inplace=True)
 
     # 对非日期列，如果存在下划线，则取下划线前部分
     new_cols = {}
